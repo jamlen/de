@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	log "github.com/Sirupsen/logrus"
@@ -51,16 +50,15 @@ func verbosityCounter(c *kingpin.ParseContext) error {
 }
 
 func main() {
-	executor := Executor{}
+	executor := RealExecutor{}
 
 	kingpin.Version("0.1.0")
 	switch kingpin.MustParse(de.Parse(os.Args[1:])) {
 	case gitPull.FullCommand():
-		GitPull(&executor)
+		g := NewGitCommand(&executor, &config)
+		g.Pull()
 	}
-	// load config.json file and parse into Repositories
-	repos := getReposToAction()
-	executor.Execute(repos)
+	executor.Execute(getReposToAction())
 }
 
 func Log(level log.Level, args ...interface{}) {
@@ -75,6 +73,7 @@ func Log(level log.Level, args ...interface{}) {
 }
 
 func getReposToAction() []Repository {
+	// load config.json file and parse into Repositories
 	return []Repository{{"master", "https://github.com/guzzlerio/deride", "./github.com/guzzlerio/deride", "guzzlerio/deride"}}
 }
 
@@ -97,11 +96,16 @@ type ExecutorItem struct {
 
 type ExecuteItemBuilder func(repo *Repository) ExecutorItem
 
-type Executor struct {
+type Executor interface {
+	Execute(repos []Repository)
+	AddItem(fn ExecuteItemBuilder)
+}
+
+type RealExecutor struct {
 	Items []ExecuteItemBuilder
 }
 
-func (e *Executor) Execute(repos []Repository) {
+func (e *RealExecutor) Execute(repos []Repository) {
 	log.Debugf("execute %d\n", verbosity)
 	for _, repo := range repos {
 		log.Debugf("repo: %+v\n", repo)
@@ -109,41 +113,11 @@ func (e *Executor) Execute(repos []Repository) {
 			item := fn(&repo)
 			//fmt.Printf("  item: %+v\n", item)
 			//fmt.Printf("%+v\n", item)
-            Log(item.logLevel, item.description)
+			Log(item.logLevel, item.description)
 		}
 	}
 }
 
-func (e *Executor) AddItem(fn ExecuteItemBuilder) {
+func (e *RealExecutor) AddItem(fn ExecuteItemBuilder) {
 	e.Items = append(e.Items, fn)
-}
-
-func GitPull(executor *Executor) {
-	executor.AddItem(func(repo *Repository) ExecutorItem {
-		return ExecutorItem{
-			fmt.Sprintf("Cloning %s", repo.Name), fmt.Sprintf("git clone -q --branch %s %s %s", repo.Branch, repo.URL, repo.Path), log.InfoLevel,
-		}
-	})
-	executor.AddItem(func(repo *Repository) ExecutorItem {
-		return ExecutorItem{
-			"", fmt.Sprintf("cd %s", repo.Path), log.PanicLevel,
-		}
-	})
-	executor.AddItem(func(repo *Repository) ExecutorItem {
-		return ExecutorItem{
-			"Fixing fetch refs", "git config remote.origin.fetch +refs/heads/*:refs/remotes/origin/*", log.DebugLevel,
-		}
-	})
-	if config.InitialiseGitFlow {
-		executor.AddItem(func(repo *Repository) ExecutorItem {
-			return ExecutorItem{
-				"Initialising for Git Flow", "git flow init -d", log.InfoLevel,
-			}
-		})
-	}
-	executor.AddItem(func(repo *Repository) ExecutorItem {
-		return ExecutorItem{
-			"", fmt.Sprintf("git checkout %s", repo.Branch), log.PanicLevel,
-		}
-	})
 }
