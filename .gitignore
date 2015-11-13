@@ -1,3 +1,6 @@
+# Compiled output file
+de
+
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o
 *.a
@@ -22,3 +25,11 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# Vim temporary files
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
