@@ -50,7 +50,7 @@ func verbosityCounter(c *kingpin.ParseContext) error {
 }
 
 func main() {
-	executor := RealExecutor{}
+	executor := NewExecutor()
 
 	kingpin.Version("0.1.0")
 	switch kingpin.MustParse(de.Parse(os.Args[1:])) {
@@ -91,33 +91,36 @@ type Repository struct {
 type ExecutorItem struct {
 	description string
 	command     string
+	args        []string
 	logLevel    log.Level
 }
 
 type ExecuteItemBuilder func(repo *Repository) ExecutorItem
 
-type Executor interface {
-	Execute(repos []Repository)
-	AddItem(fn ExecuteItemBuilder)
+type Executor struct {
+	Items map[string]ExecuteItemBuilder
 }
 
-type RealExecutor struct {
-	Items []ExecuteItemBuilder
+func NewExecutor() Executor{
+	items := make(map[string]ExecuteItemBuilder)
+	e := Executor{items}
+	return e
 }
 
-func (e *RealExecutor) Execute(repos []Repository) {
+func (e *Executor) Execute(repos []Repository) {
 	log.Debugf("execute %d\n", verbosity)
 	for _, repo := range repos {
 		log.Debugf("repo: %+v\n", repo)
-		for _, fn := range e.Items {
+		for cmd, fn := range e.Items {
 			item := fn(&repo)
 			//fmt.Printf("  item: %+v\n", item)
 			//fmt.Printf("%+v\n", item)
-			Log(item.logLevel, item.description)
+			Log(item.logLevel, item.description, cmd)
 		}
 	}
 }
 
-func (e *RealExecutor) AddItem(fn ExecuteItemBuilder) {
-	e.Items = append(e.Items, fn)
+func (e *Executor) AddItem(cmd string, fn ExecuteItemBuilder) {
+	//TODO check if key exists
+	e.Items[cmd] = fn
 }
