@@ -17,21 +17,26 @@ var (
 	verbose = de.Flag("verbose", "Verbose output").Short('v').Action(verbosityCounter).Bool()
 
 	gitCommand = de.Command("git", "Perform git commands")
-	gitPull    = gitCommand.Command("pull", "Pull projects and modules")
+	gitPull    = gitCommand.Command("pull", "Pull or clone projects and modules")
 	gitStatus  = gitCommand.Command("status", "Git status on projects and modules")
+	//gitProject    = gitCommand.Arg("project", "Which project to run against").String()
 
+    // only add if start command provided in config
 	appCommand = de.Command("app", "Perform app commands")
 	appStart   = appCommand.Command("start", "Start an app")
 	appStop    = appCommand.Command("stop", "Stop an app")
 
+    // only add if npm is detected
 	npmCommand = de.Command("npm", "Perform npm commands")
 	npmLink    = npmCommand.Command("link", "Npm link modules into projects")
 	npmInstall = npmCommand.Command("install", "Npm install modules")
 
+    // only add if bower is detected
 	bowerCommand = de.Command("bower", "Perform bower commands")
 	bowerLink    = bowerCommand.Command("link", "Bower link modules into projects")
 	bowerInstall = bowerCommand.Command("install", "Bower install modules")
 
+    // only add if test command provided in config
 	testCommand = de.Command("test", "Perform test commands")
 )
 
@@ -50,26 +55,16 @@ func verbosityCounter(c *kingpin.ParseContext) error {
 }
 
 func main() {
-	executor := NewExecutor()
+    runner := ShellRunner{}
+	executor := NewExecutor(runner)
 
 	kingpin.Version("0.1.0")
 	switch kingpin.MustParse(de.Parse(os.Args[1:])) {
 	case gitPull.FullCommand():
 		g := NewGitCommand(&executor, &config)
-		g.Pull()
+		executor.Command = g.Pull
 	}
 	executor.Execute(getReposToAction())
-}
-
-func Log(level log.Level, args ...interface{}) {
-	switch level {
-	case log.DebugLevel:
-		log.Debug(args)
-	case log.InfoLevel:
-		log.Info(args)
-	case log.WarnLevel:
-		log.Warn(args)
-	}
 }
 
 func getReposToAction() []Repository {
@@ -88,39 +83,3 @@ type Repository struct {
 	Name   string
 }
 
-type ExecutorItem struct {
-	description string
-	command     string
-	args        []string
-	logLevel    log.Level
-}
-
-type ExecuteItemBuilder func(repo *Repository) ExecutorItem
-
-type Executor struct {
-	Items map[string]ExecuteItemBuilder
-}
-
-func NewExecutor() Executor{
-	items := make(map[string]ExecuteItemBuilder)
-	e := Executor{items}
-	return e
-}
-
-func (e *Executor) Execute(repos []Repository) {
-	log.Debugf("execute %d\n", verbosity)
-	for _, repo := range repos {
-		log.Debugf("repo: %+v\n", repo)
-		for cmd, fn := range e.Items {
-			item := fn(&repo)
-			//fmt.Printf("  item: %+v\n", item)
-			//fmt.Printf("%+v\n", item)
-			Log(item.logLevel, item.description, cmd)
-		}
-	}
-}
-
-func (e *Executor) AddItem(cmd string, fn ExecuteItemBuilder) {
-	//TODO check if key exists
-	e.Items[cmd] = fn
-}
