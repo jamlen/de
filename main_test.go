@@ -16,3 +16,11 @@ package main
   * respond Yes
     * expect HEAD commit and local changes still present
 */
+
+import (
+	. "github.com/onsi/ginkgo"
+	//. "github.com/onsi/gomega"
+)
+
+var _ = Describe("Integration test", func() {
+})

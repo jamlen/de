@@ -7,14 +7,10 @@ import (
     "strings"
 )
 
-type Runner interface {
-    Run(command string, args []string) error
-}
-
 type ShellRunner struct {
 }
 
-func (runner *Runner) Run(command string, args []string) error {
+func (r *ShellRunner) Run(command string, args []string) error {
 	var stdout bytes.Buffer
 	cmd := exec.Command(command, strings.Join(args, " "))
 	cmd.Stdout = &stdout

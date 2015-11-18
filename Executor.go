@@ -30,7 +30,7 @@ type Executor struct {
 
 func NewExecutor(runner Runner) Executor {
 	items := make(map[string]ExecutorItem)
-	e := Executor{Items: items, Runner: runner}
+	e := Executor{Items: items, Runner: &runner}
 	return e
 }
 

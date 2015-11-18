@@ -13,7 +13,8 @@ var _ = Describe("GitCommand", func() {
 	)
 
 	BeforeEach(func() {
-		executor = NewExecutor()
+        runner := NullRunner{}
+		executor = NewExecutor(&runner)
 		repo = Repository{"master", "https://github.com/guzzlerio/deride", "./github.com/guzzlerio/deride", "guzzlerio/deride"}
 		cmd = NewGitCommand(&executor, &config)
 	})

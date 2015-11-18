@@ -56,7 +56,7 @@ func verbosityCounter(c *kingpin.ParseContext) error {
 
 func main() {
     runner := ShellRunner{}
-	executor := NewExecutor(runner)
+	executor := NewExecutor(&runner)
 
 	kingpin.Version("0.1.0")
 	switch kingpin.MustParse(de.Parse(os.Args[1:])) {
