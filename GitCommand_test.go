@@ -33,7 +33,9 @@ var _ = Describe("GitCommand", func() {
 				Expect(executor.Items["git clone"].args).Should(ContainElement("https://github.com/guzzlerio/deride"))
 			})
 
-			PIt("checks out the branch", func() {
+			It("checks out the branch", func() {
+				Expect(executor.Items).Should(HaveKey("git checkout"))
+				Expect(executor.Items["git checkout"].args).Should(ContainElement("master"))
 			})
 
 			Context("when configured for git flow init", func() {
@@ -70,7 +72,7 @@ var _ = Describe("GitCommand", func() {
 					}
 				})
 
-				PIt("prompts to stash, pull, pop", func() {})
+				It("prompts to stash, pull, pop", func() {})
 				Context("choosing to stash", func() {
 					BeforeEach(func() {
 						continueWithLocalChanges = func() bool {

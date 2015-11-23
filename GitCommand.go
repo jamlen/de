@@ -35,9 +35,9 @@ func (g *GitCommand) Pull(repo *Repository) {
 }
 
 func (g *GitCommand) Clone(repo *Repository) {
-    g.executor.AddItem(ExecutorItem{fmt.Sprintf("Cloning %s", repo.Name), "git clone", []string{"-q", repo.URL, repo.Path}, log.InfoLevel})
+    g.executor.AddItem(ExecutorItem{fmt.Sprintf("Cloning %s into %s", repo.Name, repo.Path), "git clone", []string{"-q", repo.URL, repo.Path}, log.InfoLevel})
     g.executor.AddItem(ExecutorItem{fmt.Sprintf("cd %s", repo.Path), "cd", []string{repo.Path}, log.DebugLevel})
-    if g.config.InitialiseGitFlow {
+    if g.config.SetupGitFlow {
         g.executor.AddItem(ExecutorItem{"Initialising for Git Flow", "git flow", []string{"init", "-d"}, log.InfoLevel})
     }
     g.executor.AddItem(ExecutorItem{fmt.Sprintf("Checkout %s", repo.Branch), "git checkout", []string{repo.Branch}, log.InfoLevel})

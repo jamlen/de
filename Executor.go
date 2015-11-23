@@ -30,6 +30,11 @@ type Executor struct {
 
 func NewExecutor(runner Runner) Executor {
 	items := make(map[string]ExecutorItem)
+	//set log.formatter to custom formatter based upon text logger
+	//  if tty attached output should be coloured:
+	//       {colour}de{/colour} - {msg} {fields}
+	//  else based upon json
+	//       time={timestamp} level={level} msg={msg} fields={fields}
 	e := Executor{Items: items, Runner: &runner}
 	return e
 }

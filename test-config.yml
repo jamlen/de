@@ -1,0 +1,19 @@
+---
+  npmInstalls: []
+  folder: "TEMP_DIR"
+  defaultRepo: "git@github.com"
+  defaultBranch: "master"
+  setupGitFlow: false
+  setupCommands:
+    - "git pull"
+    - "npm link"
+    - "npm install"
+  projects:
+    -
+      name: "github"
+      description: "These are repositories on Github which are contributed to"
+      repos:
+        - "git@github.com:guzzlerio/deride.git"
+  modules:
+    - "git@github.com:guzzlerio/deride.git#master"
+
